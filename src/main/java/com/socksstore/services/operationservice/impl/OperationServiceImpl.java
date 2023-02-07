@@ -8,6 +8,7 @@ import com.socksstore.services.fileservice.FileService;
 import com.socksstore.services.operationservice.OperationService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 
@@ -36,6 +37,43 @@ public class OperationServiceImpl implements OperationService {
         operations.add(operation);
         saveToFile();
     }
+    @Override
+    public ArrayList<Operation> getArrayListWithOperations(){
+        return operations;
+    }
+
+//    @Override
+//    public Path getTextFile() {
+//        Path file;
+//        try {
+//            file = Files.createTempFile(Path.of(operationFileService.getDataFile().toURI()), "operations", "history");
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        ArrayList<Operation> operations = getArrayListWithOperations();
+//        try(Writer writer = Files.newBufferedWriter(file, StandardOpenOption.APPEND)){
+//            for(Operation operation: operations){
+//                if(operation.getTypeOfOperations().equals(Operation.TypeOfOperations.ACCEPTANCE)){
+//                    writer.append("Replenishment of socks in stock").append("\n");
+//                }else if(operation.getTypeOfOperations().equals(Operation.TypeOfOperations.WRITING_OFF)){
+//                    writer.append("Write-off of socks from the warehouse").append("\n");
+//                }else if(operation.getTypeOfOperations().equals(Operation.TypeOfOperations.RELEASING)){
+//                    writer.append("Realization of socks to the user").append("\n");
+//                }
+//                SocksEntity socks = operation.getSocks().getSocksEntity();
+//                writer.append(operation.getDateOfOperation()).append("\n").
+//                        append("Color: ").append(socks.getColor().getNameToString()).append("\n").
+//                        append("Size: ").append(String.valueOf(socks.getReallySize())).append("\n").
+//                        append("Percentage of cotton: ").append(String.valueOf(socks.getComposition())).append("% \n").
+//                        append(String.valueOf(operation.getSocks().getSocksSize())).append("\n").
+//                        append("Quantity: ").append(String.valueOf(operation.getSocks().getQuantity())).append("\n").
+//                        append(operation.getDescription());
+//            }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return file;
+//    }
 
 
     private void saveToFile() {

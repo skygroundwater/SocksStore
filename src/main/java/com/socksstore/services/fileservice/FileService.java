@@ -14,4 +14,5 @@ public interface FileService {
     void cleanDataFile();
 
     Path createTempFile(String suffix);
+
 }

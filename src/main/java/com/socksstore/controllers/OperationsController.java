@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/operations")
 public class OperationsController {
 
-    private OperationService operationService;
+    private OperationService operationsService;
 
     private final FileService operationFileService;
 
-    public OperationsController(OperationService operationService, @Qualifier("operationsFileServiceImpl") FileService operationFileService) {
-        this.operationService = operationService;
+    public OperationsController(OperationService operationsService, @Qualifier("operationsFileServiceImpl") FileService operationFileService) {
+        this.operationsService = operationsService;
         this.operationFileService = operationFileService;
     }
 }

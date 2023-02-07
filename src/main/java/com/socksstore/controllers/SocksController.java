@@ -31,7 +31,7 @@ public class SocksController {
                                               Long quantity) {
         try {
             socksService.addSocksToStore(socks, quantity);
-            return ResponseEntity.ok("And now we have " + socksService.giveSameSocks(socks.getColor().getNameToString(), socks.getReallySize(), socks.getComposition())
+            return ResponseEntity.ok("And now we have " + socksService.giveSameSocks(socks.getColor().getNameToString(), socks.getReallySize(), socks.getComposition(), socks.getComposition())
                     + " socks of this type in the store");
         }catch (InvalidValueException e){
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -39,15 +39,17 @@ public class SocksController {
     }
 
     @Operation(summary = "Get the number of socks of a certain type")
-    @GetMapping("/sameSocks/{color}&{size}&{composition}")
+    @GetMapping("/sameSocks/{color}&{size}&{minComposition}&{maxComposition}")
     public ResponseEntity<String> getQuantityOfTheSameSocks(@PathVariable @RequestParam(name = "Color of socks")
                                                             @Parameter(description = "Color name") String color,
                                                             @PathVariable @RequestParam(name = "Size of socks")
                                                             @Parameter(description = "Floating value from 35.0 to 47.0") double size,
-                                                            @PathVariable @RequestParam(name = "The percentage of cotton in the composition")
-                                                            @Parameter(description = "Integer value from 0 to 100") int composition) {
+                                                            @PathVariable @RequestParam(name = "Minimum percentage of cotton in the composition")
+                                                            @Parameter(description = "Integer value from 0 to 100") int minComposition,
+                                                            @PathVariable @RequestParam(name = "Maximum percentage of cotton in the composition")
+                                                            @Parameter(description = "Integer value from 0 to 100. But more than minimum") int maxComposition) {
         try {
-            long quantity = socksService.giveSameSocks(color, size, composition);
+            long quantity = socksService.giveSameSocks(color, size, minComposition, maxComposition);
             return ResponseEntity.ok("There are " + quantity
                     + " socks of this type");
         } catch (InvalidValueException e) {
@@ -68,7 +70,7 @@ public class SocksController {
         } catch (InvalidValueException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok("There are " + socksService.giveSameSocks(socks.getColor().getNameToString(), socks.getReallySize(), socks.getComposition())
+        return ResponseEntity.ok("There are " + socksService.giveSameSocks(socks.getColor().getNameToString(), socks.getReallySize(), socks.getComposition(), socks.getComposition())
                 + " socks of this type left");
     }
 

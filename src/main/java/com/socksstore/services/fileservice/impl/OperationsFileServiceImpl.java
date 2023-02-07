@@ -3,6 +3,7 @@ package com.socksstore.services.fileservice.impl;
 import com.socksstore.services.fileservice.FileService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,4 +60,5 @@ public class OperationsFileServiceImpl implements FileService {
             throw new RuntimeException(e);
         }
     }
+
 }

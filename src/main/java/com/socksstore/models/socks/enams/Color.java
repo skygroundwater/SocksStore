@@ -9,8 +9,8 @@ public enum Color {
 
     private final String nameToString;
 
-    Color(String russianName){
-        this.nameToString = russianName;
+    Color(String name){
+        this.nameToString = name;
     }
 
     public String getNameToString() {

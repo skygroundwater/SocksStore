@@ -7,18 +7,17 @@ import com.socksstore.exceptions.InvalidValueException;
 import com.socksstore.exceptions.NotEnoughSocksException;
 import com.socksstore.models.operations.Operation;
 import com.socksstore.models.socks.SocksEntity;
-import com.socksstore.models.socks.enams.Color;
-import com.socksstore.models.socks.prototype.SocksPrototype;
 import com.socksstore.models.socks.enams.SocksSize;
+import com.socksstore.models.socks.prototype.SocksPrototype;
 import com.socksstore.services.fileservice.FileService;
 import com.socksstore.services.operationservice.OperationService;
 import com.socksstore.services.socksservice.SocksService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 @Service
 public class SocksServiceImpl implements SocksService {
@@ -80,18 +79,20 @@ public class SocksServiceImpl implements SocksService {
     }
 
     @Override
-    public Long giveSameSocks(String color, Double size, Integer composition) {
-        if(color.isEmpty() || color.isBlank() || size < 36 || size > 47 | composition > 100 || composition < 0){
+    public Long giveSameSocks(String color, Double size, Integer minComposition, Integer maxComposition) {
+        if(color.isEmpty() || color.isBlank() || size < 36.0 || size > 47.0 || maxComposition > 100 ||
+                minComposition < 0|| minComposition > 100 || maxComposition < 0 || maxComposition < minComposition){
             throw new InvalidValueException();
         }
+        long quantity = 0;
         for (SocksPrototype socksPrototype : store) {
             if (socksPrototype.getSocksEntity().getReallySize() == size &&
                     socksPrototype.getSocksEntity().getColor().getNameToString().equals(color.toUpperCase()) &&
-                    socksPrototype.getSocksEntity().getComposition() == composition) {
-                return socksPrototype.getQuantity();
+                    socksPrototype.getSocksEntity().getComposition() >= minComposition && socksPrototype.getSocksEntity().getComposition() <= maxComposition) {
+                quantity += socksPrototype.getQuantity();
             }
         }
-        return 0L;
+        return quantity;
     }
 
     @Override
