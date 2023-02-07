@@ -2,17 +2,21 @@ package com.socksstore.models.socks;
 
 
 import com.socksstore.models.socks.enams.Color;
-import com.socksstore.models.socks.enams.SocksSize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import javax.validation.constraints.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Socks {
+public class SocksEntity {
+    @NotBlank
+    @NotEmpty
     private Color color;
-    private SocksSize socksSize;
     private double reallySize;
+    @Positive
+    @Max(value = 100)
+    @Min(0)
     private int composition;
 }

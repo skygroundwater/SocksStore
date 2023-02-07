@@ -3,26 +3,26 @@ package com.socksstore.services.fileservice.impl;
 import com.socksstore.services.fileservice.FileService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Service
-public class FileServiceImpl implements FileService {
+public class OperationsFileServiceImpl implements FileService {
+
     @Value("${path.to.data.file}")
     private String dataFilePath;
-    @Value("${socks.in.the.store}")
+    @Value("${history.of.operations}")
     private String dataFileName;
 
     @Override
-    public File getDataFile(){
+    public File getDataFile() {
         return new File(dataFilePath + "/" + dataFileName);
     }
 
     @Override
-    public void saveToFile(String json){
+    public void saveToFile(String json) {
         try {
             cleanDataFile();
             Files.writeString(Path.of(dataFilePath, dataFileName), json);
@@ -32,13 +32,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public  String readFromFile(){
+    public String readFromFile() {
         try {
             return Files.readString(Path.of(dataFilePath, dataFileName));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
     @Override
     public void cleanDataFile() {
         try {
@@ -52,7 +53,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public Path createTempFile(String suffix) {
-        try{
+        try {
             return Files.createTempFile(Path.of(dataFilePath), "temp", suffix);
         } catch (IOException e) {
             throw new RuntimeException(e);

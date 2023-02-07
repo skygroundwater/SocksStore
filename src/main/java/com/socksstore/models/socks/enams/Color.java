@@ -2,18 +2,18 @@ package com.socksstore.models.socks.enams;
 
 public enum Color {
 
-    WHITE("Белые"), BLACK("Черные"), RED("Красные"),
-    YELLOW("Желтые"), ORANGE("Оранжевые"), GREEN("Зелёные"),
-    BLUE("Голубые"), PURPLE("Фиолетовые"), PINK("Розовые"),
-    BROWN("Коричневые"), GREY("Серые");
+    WHITE("WHITE"), BLACK("BLACK"), RED("RED"),
+    YELLOW("YELLOW"), ORANGE("ORANGE"), GREEN("GREEN"),
+    BLUE("BLUE"), PURPLE("PURPLE"), PINK("PINK"),
+    BROWN("BROWN"), GREY("GREY");
 
-    private final String russianName;
+    private final String nameToString;
 
     Color(String russianName){
-        this.russianName = russianName;
+        this.nameToString = russianName;
     }
 
-    public String getRussianName() {
-        return russianName;
+    public String getNameToString() {
+        return nameToString;
     }
 }
