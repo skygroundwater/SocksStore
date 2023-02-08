@@ -44,16 +44,8 @@ public class SocksServiceImpl implements SocksService {
 
     @Override
     public void addSocksToStore(SocksEntity socks, Long quantity) {
-        throwsInvalidValueException(socks,quantity);
-        SocksSize socksSize = null;
-        for (SocksSize socksSizes : SocksSize.values()) {
-            for (Double size : socksSizes.getSize()) {
-                if (socks.getReallySize() == size) {
-                    socksSize = socksSizes;
-                    break;
-                }
-            }
-        }
+        throwsInvalidValueException(socks, quantity);
+        SocksSize socksSize = SocksSize.checkFitToSize(socks.getReallySize());
         if (!store.isEmpty()) {
             for (SocksPrototype socksPrototype : store) {
                 if (socks.getReallySize() == socksPrototype.getSocksEntity().getReallySize() &&
@@ -74,14 +66,15 @@ public class SocksServiceImpl implements SocksService {
         operationService.registerTheOperation(
                 new Operation(Operation.TypeOfOperations.ACCEPTANCE,
                         String.valueOf(LocalDateTime.now()),
-                        new SocksPrototype(socks, socksSize, quantity), "Acceptance of socks to the warehouse from the supplier"));
+                        new SocksPrototype(socks, socksSize, quantity),
+                        "Acceptance of socks to the warehouse from the supplier"));
         saveToFile();
     }
 
     @Override
     public Long giveSameSocks(String color, Double size, Integer minComposition, Integer maxComposition) {
-        if(color.isEmpty() || color.isBlank() || size < 36.0 || size > 47.0 || maxComposition > 100 ||
-                minComposition < 0|| minComposition > 100 || maxComposition < 0 || maxComposition < minComposition){
+        if (color.isEmpty() || color.isBlank() || size < 36.0 || size > 47.0 || maxComposition > 100 ||
+                minComposition < 0 || minComposition > 100 || maxComposition < 0 || maxComposition < minComposition) {
             throw new InvalidValueException();
         }
         long quantity = 0;
@@ -97,23 +90,21 @@ public class SocksServiceImpl implements SocksService {
 
     @Override
     public void releaseSocksFromStore(SocksEntity socks, Long quantity) {
-        throwsInvalidValueException(socks,quantity);
-        if (!store.isEmpty()) {
-            for (SocksPrototype socksPrototype : store) {
-                if (socks.getReallySize() == socksPrototype.getSocksEntity().getReallySize() &&
-                        socks.getColor().equals(socksPrototype.getSocksEntity().getColor()) &&
-                        socks.getComposition() == socksPrototype.getSocksEntity().getComposition()) {
-                    if (socksPrototype.getQuantity() - quantity < 0) {
-                        throw new NotEnoughSocksException();
-                    } else {
-                        socksPrototype.setQuantity(socksPrototype.getQuantity() - quantity);
-                        saveToFile();
-                        operationService.registerTheOperation(
-                                new Operation(Operation.TypeOfOperations.RELEASING,
-                                        String.valueOf(LocalDateTime.now()),
-                                        new SocksPrototype(socks, socksPrototype.getSocksSize(), quantity), "Releasing to user"));
-                        return;
-                    }
+        throwsInvalidValueException(socks, quantity);
+        for (SocksPrototype socksPrototype : store) {
+            if (socks.getReallySize() == socksPrototype.getSocksEntity().getReallySize() &&
+                    socks.getColor().equals(socksPrototype.getSocksEntity().getColor()) &&
+                    socks.getComposition() == socksPrototype.getSocksEntity().getComposition()) {
+                if (socksPrototype.getQuantity() - quantity < 0) {
+                    throw new NotEnoughSocksException();
+                } else {
+                    socksPrototype.setQuantity(socksPrototype.getQuantity() - quantity);
+                    saveToFile();
+                    operationService.registerTheOperation(
+                            new Operation(Operation.TypeOfOperations.RELEASING,
+                                    String.valueOf(LocalDateTime.now()),
+                                    new SocksPrototype(socks, socksPrototype.getSocksSize(), quantity), "Releasing to user"));
+                    return;
                 }
             }
         }
@@ -122,7 +113,7 @@ public class SocksServiceImpl implements SocksService {
 
     @Override
     public void writeOffSocksFromStore(SocksEntity socks, Long quantity, String cause) {
-        throwsInvalidValueException(socks,quantity);
+        throwsInvalidValueException(socks, quantity);
         if (!store.isEmpty()) {
             for (SocksPrototype socksPrototype : store) {
                 if (socks.getReallySize() == socksPrototype.getSocksEntity().getReallySize() &&
@@ -146,9 +137,9 @@ public class SocksServiceImpl implements SocksService {
         saveToFile();
     }
 
-    private void throwsInvalidValueException(SocksEntity socks, Long quantity){
-        if(socks.getReallySize() < 36 || socks.getReallySize() > 47 ||
-                socks.getComposition() < 0 || socks.getComposition() > 100 || quantity <= 0){
+    private void throwsInvalidValueException(SocksEntity socks, Long quantity) {
+        if (socks.getReallySize() < 36 || socks.getReallySize() > 47 ||
+                socks.getComposition() < 0 || socks.getComposition() > 100 || quantity <= 0) {
             throw new InvalidValueException();
         }
     }

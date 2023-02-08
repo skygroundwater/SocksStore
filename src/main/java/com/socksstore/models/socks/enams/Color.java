@@ -9,7 +9,7 @@ public enum Color {
 
     private final String nameToString;
 
-    Color(String name){
+    Color(String name) {
         this.nameToString = name;
     }
 

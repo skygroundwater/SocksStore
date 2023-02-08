@@ -14,4 +14,17 @@ public enum SocksSize {
         return size;
     }
 
+    public static SocksSize checkFitToSize(double reallySize) {
+        SocksSize socksSize = null;
+        for (SocksSize socksSizes : SocksSize.values()) {
+            for (Double size : socksSizes.getSize()) {
+                if (reallySize == size) {
+                    socksSize = socksSizes;
+                    break;
+                }
+            }
+        }
+        return socksSize;
+    }
+
 }

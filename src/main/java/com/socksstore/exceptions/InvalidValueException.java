@@ -1,6 +1,6 @@
 package com.socksstore.exceptions;
 
-public class InvalidValueException extends RuntimeException{
+public class InvalidValueException extends RuntimeException {
 
     @Override
     public String getMessage() {

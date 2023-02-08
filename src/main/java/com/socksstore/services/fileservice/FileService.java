@@ -8,7 +8,6 @@ public interface FileService {
 
     void saveToFile(String json);
 
-
     String readFromFile();
 
     void cleanDataFile();

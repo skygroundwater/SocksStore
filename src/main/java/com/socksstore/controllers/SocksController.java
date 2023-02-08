@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,21 +34,22 @@ public class SocksController {
             socksService.addSocksToStore(socks, quantity);
             return ResponseEntity.ok("And now we have " + socksService.giveSameSocks(socks.getColor().getNameToString(), socks.getReallySize(), socks.getComposition(), socks.getComposition())
                     + " socks of this type in the store");
-        }catch (InvalidValueException e){
+        } catch (InvalidValueException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @Operation(summary = "Get the number of socks of a certain type")
     @GetMapping("/sameSocks/{color}&{size}&{minComposition}&{maxComposition}")
-    public ResponseEntity<String> getQuantityOfTheSameSocks(@PathVariable @RequestParam(name = "Color of socks")
+    public ResponseEntity<String> getQuantityOfTheSameSocks(@RequestParam(name = "color", required = false)
                                                             @Parameter(description = "Color name") String color,
-                                                            @PathVariable @RequestParam(name = "Size of socks")
+                                                            @RequestParam(name = "size", required = false)
                                                             @Parameter(description = "Floating value from 35.0 to 47.0") double size,
-                                                            @PathVariable @RequestParam(name = "Minimum percentage of cotton in the composition")
+                                                            @RequestParam(name = "minComposition", required = false)
                                                             @Parameter(description = "Integer value from 0 to 100") int minComposition,
-                                                            @PathVariable @RequestParam(name = "Maximum percentage of cotton in the composition")
-                                                            @Parameter(description = "Integer value from 0 to 100. But more than minimum") int maxComposition) {
+                                                            @RequestParam(name = "maxComposition", required = false)
+                                                            @Parameter(description = "Integer value from 0 to 100. But more than minimum") int maxComposition,
+                                                            Model model) {
         try {
             long quantity = socksService.giveSameSocks(color, size, minComposition, maxComposition);
             return ResponseEntity.ok("There are " + quantity
@@ -67,7 +69,7 @@ public class SocksController {
             socksService.releaseSocksFromStore(socks, quantity);
         } catch (NotEnoughSocksException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (InvalidValueException e){
+        } catch (InvalidValueException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok("There are " + socksService.giveSameSocks(socks.getColor().getNameToString(), socks.getReallySize(), socks.getComposition(), socks.getComposition())
@@ -76,18 +78,18 @@ public class SocksController {
 
     @Operation(summary = "Writing off of socks from the warehouse")
     @DeleteMapping("/write-off")
-    public ResponseEntity<Object> writeOffSocks(@RequestBody(required = false) @Parameter(description = "Passing a value as a JSON object")
+    public ResponseEntity<Object> writeOffSocks(@RequestBody(required = false)
+                                                @Parameter(description = "Passing a value as a JSON object")
                                                 SocksEntity socks,
-                                                @RequestParam @Parameter(description = "Integer value of the number of socks to be written off from the warehouse")
+                                                @RequestParam
+                                                @Parameter(description = "Integer value of the number of socks to be written off from the warehouse")
                                                 Long quantity,
                                                 @RequestParam(name = "reason for writing off socks")
                                                 @Parameter(description = "Describe the problem. Why socks should be decommissioned")
                                                 String cause) {
         try {
             socksService.writeOffSocksFromStore(socks, quantity, cause);
-        } catch (NotEnoughSocksException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }catch (InvalidValueException e){
+        } catch (NotEnoughSocksException | InvalidValueException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok().body("Defective socks successfully written off");

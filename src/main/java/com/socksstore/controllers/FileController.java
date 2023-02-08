@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.*;
 
 @RestController
@@ -33,37 +34,33 @@ public class FileController {
 
     @GetMapping("/exportsocks")
     public ResponseEntity<InputStreamResource> downloadSocksDataFile() throws FileNotFoundException {
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
-                .contentLength(socksFileService.getDataFile().length()).header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"SocksLog.json\"").body(getInputStreamFromFileOfService(socksFileService.getDataFile()));
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .contentLength(socksFileService.getDataFile().length())
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"SocksLog.json\"")
+                .body(getInputStreamFromFileOfService(socksFileService.getDataFile()));
     }
 
     @GetMapping("/exportoperations")
-    public  ResponseEntity<InputStreamResource> downLoadOperationsDataFIle() throws FileNotFoundException{
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).contentLength(operationsFileService.getDataFile().length()).header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"Operations.json\"").body(getInputStreamFromFileOfService(operationsFileService.getDataFile()));
-    }
-
-    private ResponseEntity<Void> uploadDataFile(String value, MultipartFile multipartFile) {
-        File dataFile;
-        if (value.equals("importsocks")) {
-            if (cleanDataFile(multipartFile, socksFileService)) return ResponseEntity.ok().build();
-        }
-        if(value.equals("importoperations")){
-            if (cleanDataFile(multipartFile, operationsFileService)) return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    public ResponseEntity<InputStreamResource> downLoadOperationsDataFIle() throws FileNotFoundException {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .contentLength(operationsFileService.getDataFile().length())
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"Operations.json\"")
+                .body(getInputStreamFromFileOfService(operationsFileService.getDataFile()));
     }
 
     private boolean cleanDataFile(MultipartFile multipartFile, FileService fileService) {
-        File dataFile;
+        File dataFile = fileService.getDataFile();
         fileService.cleanDataFile();
-        dataFile = fileService.getDataFile();
         try {
-            assert dataFile != null;
-            try (FileOutputStream fos = new FileOutputStream(dataFile)) {
-                IOUtils.copy(multipartFile.getInputStream(), fos);
-                return true;
+            if (dataFile != null) {
+                try (FileOutputStream fos = new FileOutputStream(dataFile)) {
+                    IOUtils.copy(multipartFile.getInputStream(), fos);
+                    return true;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -73,10 +70,19 @@ public class FileController {
 
     @PostMapping(value = "/importsocks", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> uploadSocksDataFile(@RequestParam MultipartFile file) {
-        return uploadDataFile("importsocks", file);
+        if (cleanDataFile(file, socksFileService)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
     @PostMapping(value = "/importoperations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> uploadOperationsDataFile(@RequestParam MultipartFile file) {
-        return uploadDataFile("importoperations", file);
+        if (cleanDataFile(file, operationsFileService)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
