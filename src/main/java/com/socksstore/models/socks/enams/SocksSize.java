@@ -27,4 +27,8 @@ public enum SocksSize {
         return socksSize;
     }
 
+    public String getNameOfSize(){
+        return this.name();
+    }
+
 }
