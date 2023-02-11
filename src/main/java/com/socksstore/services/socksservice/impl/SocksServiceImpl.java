@@ -16,6 +16,7 @@ import com.socksstore.services.socksservice.SocksService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.PostConstruct;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -40,16 +41,10 @@ public class SocksServiceImpl implements SocksService {
             e.printStackTrace();
         }
     }
-
-    private ArrayList<SocksPrototype> store;
-    private final FileService socksFileService;
     private final OperationService operationService;
 
-    public SocksServiceImpl(@Qualifier("socksFileServiceImpl") FileService socksFileService, OperationService operationsService) {
-        this.store = new ArrayList<>();
-        this.socksFileService = socksFileService;
+    public SocksServiceImpl(OperationService operationsService) {
         this.operationService = operationsService;
-
     }
 
     @PostConstruct
@@ -58,71 +53,47 @@ public class SocksServiceImpl implements SocksService {
             Statement statement = connectionToDatabase.createStatement();
             String SQL = "SELECT * FROM Socks";
             ResultSet resultSet = statement.executeQuery(SQL);
-            while (resultSet.next()) {
-                store.add(new SocksPrototype(new SocksEntity(Color.getColor(resultSet.getString("color")),
-                        resultSet.getFloat("reallySize"), resultSet.getInt("composition")), SocksSize.checkFitToSize(resultSet.getFloat("reallySize")), resultSet.getLong("quantity")));
-            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public void init() {
-        try {
-            readFromFile();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
     @SneakyThrows
     @Override
     public void addSocksToStore(SocksEntity socks, Long quantity) {
-        Statement statement = connectionToDatabase.createStatement();
         throwsInvalidValueException(socks, quantity);
         SocksSize socksSize = SocksSize.checkFitToSize(socks.getReallySize());
-        if (!store.isEmpty()) {
-            for (SocksPrototype socksPrototype : store) {
-                if (socks.getReallySize() == socksPrototype.getSocksEntity().getReallySize() &&
-                        socks.getColor().equals(socksPrototype.getSocksEntity().getColor()) &&
-                        socks.getComposition() == socksPrototype.getSocksEntity().getComposition()) {
-                    deleteFromTheDataBase(socksPrototype);
-                    socksPrototype.setQuantity(socksPrototype.getQuantity() + quantity);
-                    insertToDatabase(socksPrototype);
-                    saveToFile();
-                    operationService.registerTheOperation(
-                            new Operation(Operation.TypeOfOperations.ACCEPTANCE,
-                                    String.valueOf(LocalDateTime.now()),
-                                    new SocksPrototype(socks, socksPrototype.getSocksSize(), quantity),
-                                    "Acceptance of socks to the warehouse from the supplier"));
-                    return;
-                }
-            }
+        ResultSet resultSet = selectFromDataBase(socks.getColor().getNameToString(),
+                socks.getReallySize(), socks.getComposition(), socks.getComposition());
+        while (resultSet.next()) {
+            SocksPrototype socksPrototype = new SocksPrototype(
+                    new SocksEntity(
+                            Color.getColor(resultSet.getString("color")),
+                            resultSet.getFloat("reallysize"),
+                            resultSet.getInt("composition")),
+                    SocksSize.checkFitToSize(resultSet.getDouble("reallysize")),
+                    resultSet.getLong("quantity"));
+            deleteFromTheDataBase(socksPrototype);
+            socksPrototype.setQuantity(socksPrototype.getQuantity() + quantity);
+            insertToDatabase(socksPrototype);
         }
-        SocksPrototype socksPrototype = new SocksPrototype(socks, socksSize, quantity);
-        store.add(socksPrototype);
-        insertToDatabase(socksPrototype);
         operationService.registerTheOperation(
                 new Operation(Operation.TypeOfOperations.ACCEPTANCE,
                         String.valueOf(LocalDateTime.now()),
                         new SocksPrototype(socks, socksSize, quantity),
                         "Acceptance of socks to the warehouse from the supplier"));
-        saveToFile();
     }
-
+    @SneakyThrows
     @Override
     public Long giveSameSocks(String color, Double size, Integer minComposition, Integer maxComposition) {
         if (color.isEmpty() || color.isBlank() || size < 36.0 || size > 47.0 || maxComposition > 100 ||
                 minComposition < 0 || minComposition > 100 || maxComposition < 0 || maxComposition < minComposition) {
             throw new InvalidValueException();
         }
-        long quantity = 0;
-        for (SocksPrototype socksPrototype : store) {
-            if (socksPrototype.getSocksEntity().getReallySize() == size &&
-                    socksPrototype.getSocksEntity().getColor().getNameToString().equals(color.toUpperCase()) &&
-                    socksPrototype.getSocksEntity().getComposition() >= minComposition && socksPrototype.getSocksEntity().getComposition() <= maxComposition) {
-                quantity += socksPrototype.getQuantity();
-            }
+        long quantity = 0L;
+        ResultSet resultSet = selectFromDataBase(color, size, minComposition, maxComposition);
+        while (resultSet.next()) {
+            quantity = quantity + resultSet.getLong("quantity");
         }
         return quantity;
     }
@@ -131,43 +102,50 @@ public class SocksServiceImpl implements SocksService {
     @Override
     public void releaseSocksFromStore(SocksEntity socks, Long quantity) {
         throwsInvalidValueException(socks, quantity);
-        for (SocksPrototype socksPrototype : store) {
-            if (socks.getReallySize() == socksPrototype.getSocksEntity().getReallySize() &&
-                    socks.getColor().equals(socksPrototype.getSocksEntity().getColor()) &&
-                    socks.getComposition() == socksPrototype.getSocksEntity().getComposition()) {
-                if (socksPrototype.getQuantity() - quantity < 0) {
-                    throw new NotEnoughSocksException();
-                } else {
-                    deleteFromTheDataBase(socksPrototype);
-                    socksPrototype.setQuantity(socksPrototype.getQuantity() - quantity);
-                    insertToDatabase(socksPrototype);
-                    saveToFile();
-                    operationService.registerTheOperation(
-                            new Operation(Operation.TypeOfOperations.RELEASING,
-                                    String.valueOf(LocalDateTime.now()),
-                                    new SocksPrototype(socks, socksPrototype.getSocksSize(), quantity), "Releasing to user"));
-                    return;
-                }
+        ResultSet resultSet = selectFromDataBase(socks.getColor().getNameToString(),
+                socks.getReallySize(), socks.getComposition(), socks.getComposition());
+        while (resultSet.next()) {
+            SocksPrototype socksPrototype = new SocksPrototype(
+                    new SocksEntity(
+                            Color.getColor(resultSet.getString("color")),
+                            resultSet.getFloat("reallysize"),
+                            resultSet.getInt("composition")),
+                    SocksSize.checkFitToSize(resultSet.getDouble("reallysize")),
+                    resultSet.getLong("quantity"));
+            if (socksPrototype.getQuantity() - quantity < 0) {
+                throw new NotEnoughSocksException();
+            } else {
+                deleteFromTheDataBase(socksPrototype);
+                socksPrototype.setQuantity(socksPrototype.getQuantity() - quantity);
+                insertToDatabase(socksPrototype);
+                operationService.registerTheOperation(
+                        new Operation(Operation.TypeOfOperations.RELEASING,
+                                String.valueOf(LocalDateTime.now()),
+                                new SocksPrototype(socks, socksPrototype.getSocksSize(), quantity), "Releasing to user"));
+                return;
             }
         }
-        saveToFile();
     }
-
+    @SneakyThrows
     @Override
     public void writeOffSocksFromStore(SocksEntity socks, Long quantity, String cause) {
         throwsInvalidValueException(socks, quantity);
-        if (!store.isEmpty()) {
-            for (SocksPrototype socksPrototype : store) {
-                if (socks.getReallySize() == socksPrototype.getSocksEntity().getReallySize() &&
-                        socks.getColor().equals(socksPrototype.getSocksEntity().getColor()) &&
-                        socks.getComposition() == socksPrototype.getSocksEntity().getComposition()) {
-                    if (socksPrototype.getQuantity() - quantity <= 0) {
+        ResultSet resultSet = selectFromDataBase(socks.getColor().getNameToString(),
+                socks.getReallySize(), socks.getComposition(), socks.getComposition());
+        while (resultSet.next()) {
+            SocksPrototype socksPrototype = new SocksPrototype(
+                    new SocksEntity(
+                            Color.getColor(resultSet.getString("color")),
+                            resultSet.getFloat("reallysize"),
+                            resultSet.getInt("composition")),
+                    SocksSize.checkFitToSize(resultSet.getDouble("reallysize")),
+                    resultSet.getLong("quantity"));
+                    if (socksPrototype.getQuantity() - quantity < 0) {
                         throw new NotEnoughSocksException();
                     } else {
                         deleteFromTheDataBase(socksPrototype);
                         socksPrototype.setQuantity(socksPrototype.getQuantity() - quantity);
                         insertToDatabase(socksPrototype);
-                        saveToFile();
                         operationService.registerTheOperation(
                                 new Operation(Operation.TypeOfOperations.WRITING_OFF,
                                         String.valueOf(LocalDateTime.now()),
@@ -175,8 +153,6 @@ public class SocksServiceImpl implements SocksService {
                                         "Writing of the socks from the warehouse. \n Cause: " + cause));
                         return;
                     }
-                }
-            }
         }
         throw new NotEnoughSocksException();
     }
@@ -189,10 +165,12 @@ public class SocksServiceImpl implements SocksService {
         preparedStatement.setLong(5, socksPrototype.getQuantity());
         preparedStatement.executeUpdate();
     }
+
     private void deleteFromTheDataBase(SocksPrototype socksPrototype) {
         try {
             PreparedStatement deletePreparedStatement =
-                    connectionToDatabase.prepareStatement("DELETE FROM Socks WHERE color = ? AND reallysize = ?  AND composition = ? AND sockssize = ? AND quantity = ?");
+                    connectionToDatabase.prepareStatement("DELETE FROM Socks WHERE color = ? " +
+                            "AND reallysize = ?  AND composition = ? AND sockssize = ? AND quantity = ?");
             preparedStatement(socksPrototype, deletePreparedStatement);
 
         } catch (SQLException e) {
@@ -210,29 +188,26 @@ public class SocksServiceImpl implements SocksService {
         }
     }
 
+    private ResultSet selectFromDataBase(String color, Double size, Integer minComposition, Integer maxComposition) {
+        try {
+            PreparedStatement selectPreparedStatement =
+                    connectionToDatabase.prepareStatement("SELECT * FROM Socks WHERE color = ? " +
+                            "AND reallysize = ? AND composition BETWEEN ? AND ?");
+            selectPreparedStatement.setString(1, color.toUpperCase());
+            selectPreparedStatement.setDouble(2, size);
+            selectPreparedStatement.setInt(3, minComposition);
+            selectPreparedStatement.setInt(4, maxComposition);
+            return selectPreparedStatement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        throw new InvalidValueException();
+    }
+
     private void throwsInvalidValueException(SocksEntity socks, Long quantity) {
         if (socks.getReallySize() < 36 || socks.getReallySize() > 47 ||
                 socks.getComposition() < 0 || socks.getComposition() > 100 || quantity <= 0) {
             throw new InvalidValueException();
-        }
-    }
-
-    private void saveToFile() {
-        try {
-            String json = new ObjectMapper().writeValueAsString(store);
-            socksFileService.saveToFile(json);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void readFromFile() {
-        try {
-            String json = socksFileService.readFromFile();
-            store = new ObjectMapper().readValue(json, new TypeReference<ArrayList<SocksPrototype>>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException();
         }
     }
 }
