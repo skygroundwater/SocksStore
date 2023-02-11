@@ -73,9 +73,7 @@ public class SocksServiceImpl implements SocksService {
                             resultSet.getInt("composition")),
                     SocksSize.checkFitToSize(resultSet.getDouble("reallysize")),
                     resultSet.getLong("quantity"));
-            deleteFromTheDataBase(socksPrototype);
-            socksPrototype.setQuantity(socksPrototype.getQuantity() + quantity);
-            insertToDatabase(socksPrototype);
+            addQuantityForSocks(socksPrototype, quantity);
             operationService.registerTheOperation(
                     new Operation(Operation.TypeOfOperations.ACCEPTANCE,
                             String.valueOf(LocalDateTime.now()),
@@ -122,9 +120,7 @@ public class SocksServiceImpl implements SocksService {
             if (socksPrototype.getQuantity() - quantity < 0) {
                 throw new NotEnoughSocksException();
             } else {
-                deleteFromTheDataBase(socksPrototype);
-                socksPrototype.setQuantity(socksPrototype.getQuantity() - quantity);
-                insertToDatabase(socksPrototype);
+                takeAwayQuantityForSocks(socksPrototype, quantity);
                 operationService.registerTheOperation(
                         new Operation(Operation.TypeOfOperations.RELEASING,
                                 String.valueOf(LocalDateTime.now()),
@@ -150,9 +146,7 @@ public class SocksServiceImpl implements SocksService {
                     if (socksPrototype.getQuantity() - quantity < 0) {
                         throw new NotEnoughSocksException();
                     } else {
-                        deleteFromTheDataBase(socksPrototype);
-                        socksPrototype.setQuantity(socksPrototype.getQuantity() - quantity);
-                        insertToDatabase(socksPrototype);
+                        takeAwayQuantityForSocks(socksPrototype, quantity);
                         operationService.registerTheOperation(
                                 new Operation(Operation.TypeOfOperations.WRITING_OFF,
                                         String.valueOf(LocalDateTime.now()),
@@ -194,7 +188,7 @@ public class SocksServiceImpl implements SocksService {
             addPreparedStatement.setDouble(3, socksPrototype.getSocksEntity().getReallySize());
             addPreparedStatement.setInt(4, socksPrototype.getSocksEntity().getComposition());
             addPreparedStatement.setString(5, socksPrototype.getSocksSize().getNameOfSize());
-            addPreparedStatement.executeQuery();
+            addPreparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -202,14 +196,14 @@ public class SocksServiceImpl implements SocksService {
 
     private void takeAwayQuantityForSocks(SocksPrototype socksPrototype, long quantity){
         try {
-            PreparedStatement addPreparedStatement =
+            PreparedStatement takeAwayPreparedStatement =
                     connectionToDatabase.prepareStatement("UPDATE Socks SET quantity=? WHERE color=? AND  reallysize=? AND  composition =? AND sockssize=?");
-            addPreparedStatement.setLong(1, socksPrototype.getQuantity() - quantity);
-            addPreparedStatement.setString(2, socksPrototype.getSocksEntity().getColor().getNameToString());
-            addPreparedStatement.setDouble(3, socksPrototype.getSocksEntity().getReallySize());
-            addPreparedStatement.setInt(4, socksPrototype.getSocksEntity().getComposition());
-            addPreparedStatement.setString(5, socksPrototype.getSocksSize().getNameOfSize());
-            addPreparedStatement.executeQuery();
+            takeAwayPreparedStatement.setLong(1, socksPrototype.getQuantity() - quantity);
+            takeAwayPreparedStatement.setString(2, socksPrototype.getSocksEntity().getColor().getNameToString());
+            takeAwayPreparedStatement.setDouble(3, socksPrototype.getSocksEntity().getReallySize());
+            takeAwayPreparedStatement.setInt(4, socksPrototype.getSocksEntity().getComposition());
+            takeAwayPreparedStatement.setString(5, socksPrototype.getSocksSize().getNameOfSize());
+            takeAwayPreparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
