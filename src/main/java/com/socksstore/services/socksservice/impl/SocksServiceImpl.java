@@ -76,7 +76,14 @@ public class SocksServiceImpl implements SocksService {
             deleteFromTheDataBase(socksPrototype);
             socksPrototype.setQuantity(socksPrototype.getQuantity() + quantity);
             insertToDatabase(socksPrototype);
+            operationService.registerTheOperation(
+                    new Operation(Operation.TypeOfOperations.ACCEPTANCE,
+                            String.valueOf(LocalDateTime.now()),
+                            new SocksPrototype(socks, socksSize, quantity),
+                            "Acceptance of socks to the warehouse from the supplier"));
+            return;
         }
+        insertToDatabase(new SocksPrototype(socks, socksSize, quantity));
         operationService.registerTheOperation(
                 new Operation(Operation.TypeOfOperations.ACCEPTANCE,
                         String.valueOf(LocalDateTime.now()),
@@ -175,6 +182,36 @@ public class SocksServiceImpl implements SocksService {
 
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void addQuantityForSocks(SocksPrototype socksPrototype, long quantity){
+        try {
+            PreparedStatement addPreparedStatement =
+                    connectionToDatabase.prepareStatement("UPDATE Socks SET quantity=? WHERE color=? AND  reallysize=? AND  composition =? AND sockssize=?");
+            addPreparedStatement.setLong(1, socksPrototype.getQuantity() + quantity);
+            addPreparedStatement.setString(2, socksPrototype.getSocksEntity().getColor().getNameToString());
+            addPreparedStatement.setDouble(3, socksPrototype.getSocksEntity().getReallySize());
+            addPreparedStatement.setInt(4, socksPrototype.getSocksEntity().getComposition());
+            addPreparedStatement.setString(5, socksPrototype.getSocksSize().getNameOfSize());
+            addPreparedStatement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void takeAwayQuantityForSocks(SocksPrototype socksPrototype, long quantity){
+        try {
+            PreparedStatement addPreparedStatement =
+                    connectionToDatabase.prepareStatement("UPDATE Socks SET quantity=? WHERE color=? AND  reallysize=? AND  composition =? AND sockssize=?");
+            addPreparedStatement.setLong(1, socksPrototype.getQuantity() - quantity);
+            addPreparedStatement.setString(2, socksPrototype.getSocksEntity().getColor().getNameToString());
+            addPreparedStatement.setDouble(3, socksPrototype.getSocksEntity().getReallySize());
+            addPreparedStatement.setInt(4, socksPrototype.getSocksEntity().getComposition());
+            addPreparedStatement.setString(5, socksPrototype.getSocksSize().getNameOfSize());
+            addPreparedStatement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
