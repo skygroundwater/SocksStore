@@ -1,5 +1,6 @@
 package com.socksstore.controllers;
 
+import com.socksstore.services.databaseservice.DataBaseService;
 import com.socksstore.services.fileservice.FileService;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,10 +20,14 @@ public class FileController {
     private final FileService socksFileService;
     private final FileService operationsFileService;
 
+    private final DataBaseService dataBaseService;
+
     public FileController(@Qualifier("socksFileServiceImpl") FileService socksFileService,
-                          @Qualifier("operationsFileServiceImpl") FileService operationsFileService) {
+                          @Qualifier("operationsFileServiceImpl") FileService operationsFileService,
+                          DataBaseService dataBaseService) {
         this.socksFileService = socksFileService;
         this.operationsFileService = operationsFileService;
+        this.dataBaseService = dataBaseService;
     }
 
     private InputStreamResource getInputStreamFromFileOfService(File file) throws FileNotFoundException {
