@@ -21,7 +21,4 @@ public class SocksPrototype {
     @Min(0)
     private long quantity;
 
-
-
-
 }

@@ -2,10 +2,16 @@ package com.socksstore.services.databaseservice;
 
 import com.socksstore.models.socks.prototype.SocksPrototype;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.sql.ResultSet;
 
 public interface DataBaseService {
-    void deleteFromTheDataBase(SocksPrototype socksPrototype);
+
+    void getExcelFileWithSocks();
+
+    File getTextFileWithSocks();
 
     void addQuantityForSocks(SocksPrototype socksPrototype, long quantity);
 

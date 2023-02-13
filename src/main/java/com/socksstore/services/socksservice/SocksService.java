@@ -1,6 +1,7 @@
 package com.socksstore.services.socksservice;
 
 import com.socksstore.models.socks.SocksEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface SocksService {
     void addSocksToStore(SocksEntity socks, Long quantity);

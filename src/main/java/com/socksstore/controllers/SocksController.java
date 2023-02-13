@@ -8,10 +8,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 @RequestMapping("/socks")
 @Tag(name = "CONTROL SYSTEM FOR STOCKED SOCKS")
 public class SocksController {
@@ -26,9 +27,11 @@ public class SocksController {
             summary = "Acceptance of new socks to the warehouse"
     )
     @PostMapping()
-    public ResponseEntity<String> addNewSocks(@RequestBody @Parameter(description = "Passing a value as a JSON object")
+    public ResponseEntity<String> addNewSocks(
+            @RequestBody @Parameter(description = "Passing a value as a JSON object")
                                               SocksEntity socks,
-                                              @RequestParam @Parameter(description = "Integer value of the number of socks to be added to the warehouse")
+
+            @RequestParam @Parameter(description = "Integer value of the number of socks to be added to the warehouse")
                                               Long quantity) {
         try {
             socksService.addSocksToStore(socks, quantity);
@@ -40,7 +43,7 @@ public class SocksController {
     }
 
     @Operation(summary = "Get the number of socks of a certain type")
-    @GetMapping("/sameSocks")
+    @GetMapping("/same")
     public ResponseEntity<String> getQuantityOfTheSameSocks(@RequestParam(name = "color")
                                                             @Parameter(description = "Color name") String color,
                                                             @RequestParam(name = "size")

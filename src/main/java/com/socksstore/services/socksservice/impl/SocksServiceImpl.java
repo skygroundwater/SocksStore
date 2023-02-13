@@ -2,7 +2,6 @@ package com.socksstore.services.socksservice.impl;
 
 import com.socksstore.exceptions.InvalidValueException;
 import com.socksstore.exceptions.NotEnoughSocksException;
-import com.socksstore.models.operations.Operation;
 import com.socksstore.models.socks.SocksEntity;
 import com.socksstore.models.socks.enams.Color;
 import com.socksstore.models.socks.enams.SocksSize;
@@ -13,7 +12,6 @@ import com.socksstore.services.socksservice.SocksService;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import java.sql.ResultSet;
-import java.time.LocalDateTime;
 
 @Service
 public class SocksServiceImpl implements SocksService {
@@ -22,10 +20,12 @@ public class SocksServiceImpl implements SocksService {
 
     private final DataBaseService dataBaseService;
 
-    public SocksServiceImpl(OperationService operationsService, DataBaseService dataBaseService) {
+    public SocksServiceImpl(OperationService operationsService,
+                            DataBaseService dataBaseService) {
         this.operationService = operationsService;
         this.dataBaseService = dataBaseService;
     }
+
 
     @SneakyThrows
     @Override
@@ -49,6 +49,7 @@ public class SocksServiceImpl implements SocksService {
         dataBaseService.insertToDatabase(new SocksPrototype(socks, socksSize, quantity));
         operationService.registerAcceptOperation(socks, socksSize, quantity);
     }
+
     @SneakyThrows
     @Override
     public Long giveSameSocks(String color, Double size, Integer minComposition, Integer maxComposition) {
@@ -87,6 +88,7 @@ public class SocksServiceImpl implements SocksService {
             }
         }
     }
+
     @SneakyThrows
     @Override
     public void writeOffSocksFromStore(SocksEntity socks, Long quantity, String cause) {
@@ -101,13 +103,13 @@ public class SocksServiceImpl implements SocksService {
                             resultSet.getInt("composition")),
                     SocksSize.checkFitToSize(resultSet.getDouble("reallysize")),
                     resultSet.getLong("quantity"));
-                    if (socksPrototype.getQuantity() - quantity < 0) {
-                        throw new NotEnoughSocksException();
-                    } else {
-                        dataBaseService.takeAwayQuantityForSocks(socksPrototype, quantity);
-                        operationService.registerWritingOffOperation(socks, SocksSize.checkFitToSize(socks.getReallySize()), quantity, cause);
-                        return;
-                    }
+            if (socksPrototype.getQuantity() - quantity < 0) {
+                throw new NotEnoughSocksException();
+            } else {
+                dataBaseService.takeAwayQuantityForSocks(socksPrototype, quantity);
+                operationService.registerWritingOffOperation(socks, SocksSize.checkFitToSize(socks.getReallySize()), quantity, cause);
+                return;
+            }
         }
         throw new NotEnoughSocksException();
     }
