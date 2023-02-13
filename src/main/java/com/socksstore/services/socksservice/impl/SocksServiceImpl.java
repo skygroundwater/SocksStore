@@ -26,7 +26,6 @@ public class SocksServiceImpl implements SocksService {
         this.dataBaseService = dataBaseService;
     }
 
-
     @SneakyThrows
     @Override
     public void addSocksToStore(SocksEntity socks, Long quantity) {
@@ -107,7 +106,8 @@ public class SocksServiceImpl implements SocksService {
                 throw new NotEnoughSocksException();
             } else {
                 dataBaseService.takeAwayQuantityForSocks(socksPrototype, quantity);
-                operationService.registerWritingOffOperation(socks, SocksSize.checkFitToSize(socks.getReallySize()), quantity, cause);
+                operationService.registerWritingOffOperation(socks,
+                        SocksSize.checkFitToSize(socks.getReallySize()), quantity, cause);
                 return;
             }
         }

@@ -32,5 +32,4 @@ public enum SocksSize {
     public String getNameOfSize() {
         return this.name();
     }
-
 }
