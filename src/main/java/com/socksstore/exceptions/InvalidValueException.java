@@ -6,5 +6,4 @@ public class InvalidValueException extends RuntimeException {
     public String getMessage() {
         return "You entered an invalid value when prompted";
     }
-
 }

@@ -18,6 +18,7 @@ public enum Color {
     public String getNameToString() {
         return nameToString;
     }
+
     public static Color getColor(String colorName){
         for(Color color: values()){
             if((colorName.toUpperCase()).equals(color.nameToString)){

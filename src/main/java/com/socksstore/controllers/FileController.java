@@ -6,10 +6,11 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.file.Files;
@@ -18,15 +19,12 @@ import java.nio.file.Files;
 @RequestMapping("/files")
 public class FileController {
 
-    private final FileService socksFileService;
     private final FileService operationsFileService;
 
     private final DataBaseService dataBaseService;
 
-    public FileController(@Qualifier("socksFileServiceImpl") FileService socksFileService,
-                          @Qualifier("operationsFileServiceImpl") FileService operationsFileService,
+    public FileController(@Qualifier("operationsFileServiceImpl") FileService operationsFileService,
                           DataBaseService dataBaseService) {
-        this.socksFileService = socksFileService;
         this.operationsFileService = operationsFileService;
         this.dataBaseService = dataBaseService;
     }

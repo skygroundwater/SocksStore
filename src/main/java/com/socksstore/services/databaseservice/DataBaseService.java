@@ -3,13 +3,9 @@ package com.socksstore.services.databaseservice;
 import com.socksstore.models.socks.prototype.SocksPrototype;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.sql.ResultSet;
 
 public interface DataBaseService {
-
-    void getExcelFileWithSocks();
 
     File getTextFileWithSocks();
 

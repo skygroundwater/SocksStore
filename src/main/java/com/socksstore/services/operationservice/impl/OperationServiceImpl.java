@@ -39,10 +39,12 @@ public class OperationServiceImpl implements OperationService {
             e.printStackTrace();
         }
     }
+
     private void registerTheOperation(Operation operation) {
         operations.add(operation);
         saveToFile();
     }
+
     @Override
     public void registerAcceptOperation(SocksEntity socks, SocksSize socksSize, Long quantity){
         registerTheOperation(
@@ -59,6 +61,7 @@ public class OperationServiceImpl implements OperationService {
                         String.valueOf(LocalDateTime.now()),
                         new SocksPrototype(socks, socksSize, quantity), "Releasing to user"));
     }
+
     @Override
     public void registerWritingOffOperation(SocksEntity socks, SocksSize socksSize, Long quantity, String cause){
         registerTheOperation(
@@ -66,11 +69,6 @@ public class OperationServiceImpl implements OperationService {
                         String.valueOf(LocalDateTime.now()),
                         new SocksPrototype(socks, socksSize, quantity),
                         "Writing of the socks from the warehouse. \n Cause: " + cause));
-    }
-
-    @Override
-    public ArrayList<Operation> getArrayListWithOperations() {
-        return operations;
     }
 
     @Override
