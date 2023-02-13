@@ -1,5 +1,7 @@
 package com.socksstore.models.socks.enams;
 
+import com.socksstore.exceptions.InvalidValueException;
+
 public enum Color {
 
     WHITE("WHITE"), BLACK("BLACK"), RED("RED"),
@@ -15,5 +17,14 @@ public enum Color {
 
     public String getNameToString() {
         return nameToString;
+    }
+
+    public static Color getColor(String colorName){
+        for(Color color: values()){
+            if((colorName.toUpperCase()).equals(color.nameToString)){
+                return color;
+            }
+        }
+        throw new InvalidValueException();
     }
 }

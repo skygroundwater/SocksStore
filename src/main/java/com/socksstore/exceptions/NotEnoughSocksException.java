@@ -1,6 +1,7 @@
 package com.socksstore.exceptions;
 
 public class NotEnoughSocksException extends RuntimeException {
+
     public NotEnoughSocksException() {
         super();
     }

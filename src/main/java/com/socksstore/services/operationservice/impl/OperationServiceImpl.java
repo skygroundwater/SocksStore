@@ -5,11 +5,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socksstore.models.operations.Operation;
 import com.socksstore.models.socks.SocksEntity;
+import com.socksstore.models.socks.enams.SocksSize;
+import com.socksstore.models.socks.prototype.SocksPrototype;
 import com.socksstore.services.fileservice.FileService;
 import com.socksstore.services.operationservice.OperationService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
@@ -17,12 +18,12 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @Service
 public class OperationServiceImpl implements OperationService {
     private ArrayList<Operation> operations;
-
     private final FileService operationFileService;
 
     public OperationServiceImpl(@Qualifier("operationsFileServiceImpl") FileService operationsFileService) {
@@ -39,15 +40,35 @@ public class OperationServiceImpl implements OperationService {
         }
     }
 
-    @Override
-    public void registerTheOperation(Operation operation) {
+    private void registerTheOperation(Operation operation) {
         operations.add(operation);
         saveToFile();
     }
 
     @Override
-    public ArrayList<Operation> getArrayListWithOperations() {
-        return operations;
+    public void registerAcceptOperation(SocksEntity socks, SocksSize socksSize, Long quantity){
+        registerTheOperation(
+                new Operation(Operation.TypeOfOperations.ACCEPTANCE,
+                        String.valueOf(LocalDateTime.now()),
+                        new SocksPrototype(socks, socksSize, quantity),
+                        "Acceptance of socks to the warehouse from the supplier"));
+    }
+
+    @Override
+    public void registerReleasingOperation(SocksEntity socks, SocksSize socksSize, Long quantity){
+        registerTheOperation(
+                new Operation(Operation.TypeOfOperations.RELEASING,
+                        String.valueOf(LocalDateTime.now()),
+                        new SocksPrototype(socks, socksSize, quantity), "Releasing to user"));
+    }
+
+    @Override
+    public void registerWritingOffOperation(SocksEntity socks, SocksSize socksSize, Long quantity, String cause){
+        registerTheOperation(
+                new Operation(Operation.TypeOfOperations.WRITING_OFF,
+                        String.valueOf(LocalDateTime.now()),
+                        new SocksPrototype(socks, socksSize, quantity),
+                        "Writing of the socks from the warehouse. \n Cause: " + cause));
     }
 
     @Override
@@ -77,7 +98,6 @@ public class OperationServiceImpl implements OperationService {
         }
         return file;
     }
-
 
     private void saveToFile() {
         try {

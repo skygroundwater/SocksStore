@@ -26,9 +26,11 @@ public class SocksController {
             summary = "Acceptance of new socks to the warehouse"
     )
     @PostMapping()
-    public ResponseEntity<String> addNewSocks(@RequestBody @Parameter(description = "Passing a value as a JSON object")
+    public ResponseEntity<String> addNewSocks(
+            @RequestBody @Parameter(description = "Passing a value as a JSON object")
                                               SocksEntity socks,
-                                              @RequestParam @Parameter(description = "Integer value of the number of socks to be added to the warehouse")
+
+            @RequestParam @Parameter(description = "Integer value of the number of socks to be added to the warehouse")
                                               Long quantity) {
         try {
             socksService.addSocksToStore(socks, quantity);
@@ -40,14 +42,14 @@ public class SocksController {
     }
 
     @Operation(summary = "Get the number of socks of a certain type")
-    @GetMapping("/sameSocks/{color}&{size}&{minComposition}&{maxComposition}")
-    public ResponseEntity<String> getQuantityOfTheSameSocks(@RequestParam(name = "color", required = false)
+    @GetMapping("/same")
+    public ResponseEntity<String> getQuantityOfTheSameSocks(@RequestParam(name = "color")
                                                             @Parameter(description = "Color name") String color,
-                                                            @RequestParam(name = "size", required = false)
+                                                            @RequestParam(name = "size")
                                                             @Parameter(description = "Floating value from 35.0 to 47.0") double size,
-                                                            @RequestParam(name = "minComposition", required = false)
+                                                            @RequestParam(name = "minComposition")
                                                             @Parameter(description = "Integer value from 0 to 100") int minComposition,
-                                                            @RequestParam(name = "maxComposition", required = false)
+                                                            @RequestParam(name = "maxComposition")
                                                             @Parameter(description = "Integer value from 0 to 100. But more than minimum") int maxComposition,
                                                             Model model) {
         try {
@@ -78,7 +80,7 @@ public class SocksController {
 
     @Operation(summary = "Writing off of socks from the warehouse")
     @DeleteMapping("/write-off")
-    public ResponseEntity<Object> writeOffSocks(@RequestBody(required = false)
+    public ResponseEntity<Object> writeOffSocks(@RequestBody
                                                 @Parameter(description = "Passing a value as a JSON object")
                                                 SocksEntity socks,
                                                 @RequestParam

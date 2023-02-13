@@ -21,5 +21,4 @@ public class Operation {
     private SocksPrototype socks;
 
     private String description;
-
 }

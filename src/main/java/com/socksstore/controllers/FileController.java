@@ -1,29 +1,32 @@
 package com.socksstore.controllers;
 
+import com.socksstore.services.databaseservice.DataBaseService;
 import com.socksstore.services.fileservice.FileService;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.*;
+import java.nio.file.Files;
 
 @RestController
 @RequestMapping("/files")
 public class FileController {
 
-    private final FileService socksFileService;
     private final FileService operationsFileService;
 
-    public FileController(@Qualifier("socksFileServiceImpl") FileService socksFileService,
-                          @Qualifier("operationsFileServiceImpl") FileService operationsFileService) {
-        this.socksFileService = socksFileService;
+    private final DataBaseService dataBaseService;
+
+    public FileController(@Qualifier("operationsFileServiceImpl") FileService operationsFileService,
+                          DataBaseService dataBaseService) {
         this.operationsFileService = operationsFileService;
+        this.dataBaseService = dataBaseService;
     }
 
     private InputStreamResource getInputStreamFromFileOfService(File file) throws FileNotFoundException {
@@ -32,24 +35,28 @@ public class FileController {
         } else return null;
     }
 
-    @GetMapping("/exportsocks")
-    public ResponseEntity<InputStreamResource> downloadSocksDataFile() throws FileNotFoundException {
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .contentLength(socksFileService.getDataFile().length())
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"SocksLog.json\"")
-                .body(getInputStreamFromFileOfService(socksFileService.getDataFile()));
-    }
-
-    @GetMapping("/exportoperations")
-    public ResponseEntity<InputStreamResource> downLoadOperationsDataFIle() throws FileNotFoundException {
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .contentLength(operationsFileService.getDataFile().length())
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"Operations.json\"")
-                .body(getInputStreamFromFileOfService(operationsFileService.getDataFile()));
+    @GetMapping("/socksintxt")
+    public ResponseEntity<Object> createTempTextFileWithSocks() {
+        File file = dataBaseService.getTextFileWithSocks();
+        try {
+            if (file == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (Files.size(file.toPath()) == 0) {
+                return ResponseEntity.noContent().build();
+            }
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"socks.txt\"")
+                    .contentLength(Files.size(file.toPath()))
+                    .body(resource);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(e.toString());
+        }
     }
 
     private boolean cleanDataFile(MultipartFile multipartFile, FileService fileService) {
@@ -66,23 +73,5 @@ public class FileController {
             e.printStackTrace();
         }
         return false;
-    }
-
-    @PostMapping(value = "/importsocks", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> uploadSocksDataFile(@RequestParam MultipartFile file) {
-        if (cleanDataFile(file, socksFileService)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @PostMapping(value = "/importoperations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> uploadOperationsDataFile(@RequestParam MultipartFile file) {
-        if (cleanDataFile(file, operationsFileService)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
 }
