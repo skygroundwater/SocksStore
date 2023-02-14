@@ -4,10 +4,13 @@ import com.socksstore.models.socks.prototype.SocksPrototype;
 
 import java.io.File;
 import java.sql.ResultSet;
+import java.util.List;
 
 public interface DataBaseService {
 
     File getTextFileWithSocks();
+
+    void deleteFromTheDataBase(SocksPrototype socksPrototype);
 
     void addQuantityForSocks(SocksPrototype socksPrototype, long quantity);
 
@@ -15,5 +18,5 @@ public interface DataBaseService {
 
     void insertToDatabase(SocksPrototype socksPrototype);
 
-    ResultSet selectFromDataBase(String color, Double size, Integer minComposition, Integer maxComposition);
+    List<SocksPrototype> selectFromDataBase(String color, Double size, Integer minComposition, Integer maxComposition);
 }
