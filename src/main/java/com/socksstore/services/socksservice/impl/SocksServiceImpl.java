@@ -12,6 +12,8 @@ import com.socksstore.services.socksservice.SocksService;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class SocksServiceImpl implements SocksService {
@@ -31,16 +33,9 @@ public class SocksServiceImpl implements SocksService {
     public void addSocksToStore(SocksEntity socks, Long quantity) {
         throwsInvalidValueException(socks, quantity);
         SocksSize socksSize = SocksSize.checkFitToSize(socks.getReallySize());
-        ResultSet resultSet = dataBaseService.selectFromDataBase(socks.getColor().getNameToString(),
+        List<SocksPrototype> socksList = dataBaseService.selectFromDataBase(socks.getColor().getNameToString(),
                 socks.getReallySize(), socks.getComposition(), socks.getComposition());
-        while (resultSet.next()) {
-            SocksPrototype socksPrototype = new SocksPrototype(
-                    new SocksEntity(
-                            Color.getColor(resultSet.getString("color")),
-                            resultSet.getFloat("reallysize"),
-                            resultSet.getInt("composition")),
-                    SocksSize.checkFitToSize(resultSet.getDouble("reallysize")),
-                    resultSet.getLong("quantity"));
+        for (SocksPrototype socksPrototype: socksList){
             dataBaseService.addQuantityForSocks(socksPrototype, quantity);
             operationService.registerAcceptOperation(socks, socksSize, quantity);
             return;
@@ -57,9 +52,9 @@ public class SocksServiceImpl implements SocksService {
             throw new InvalidValueException();
         }
         long quantity = 0L;
-        ResultSet resultSet = dataBaseService.selectFromDataBase(color, size, minComposition, maxComposition);
-        while (resultSet.next()) {
-            quantity = quantity + resultSet.getLong("quantity");
+        List<SocksPrototype> socksList = dataBaseService.selectFromDataBase(color, size, minComposition, maxComposition);
+        for(SocksPrototype socksPrototype: socksList){
+            quantity = quantity + socksPrototype.getQuantity();
         }
         return quantity;
     }
@@ -68,16 +63,9 @@ public class SocksServiceImpl implements SocksService {
     @Override
     public void releaseSocksFromStore(SocksEntity socks, Long quantity) {
         throwsInvalidValueException(socks, quantity);
-        ResultSet resultSet = dataBaseService.selectFromDataBase(socks.getColor().getNameToString(),
+        List<SocksPrototype> socksList = dataBaseService.selectFromDataBase(socks.getColor().getNameToString(),
                 socks.getReallySize(), socks.getComposition(), socks.getComposition());
-        while (resultSet.next()) {
-            SocksPrototype socksPrototype = new SocksPrototype(
-                    new SocksEntity(
-                            Color.getColor(resultSet.getString("color")),
-                            resultSet.getFloat("reallysize"),
-                            resultSet.getInt("composition")),
-                    SocksSize.checkFitToSize(resultSet.getDouble("reallysize")),
-                    resultSet.getLong("quantity"));
+        for(SocksPrototype socksPrototype: socksList){
             if (socksPrototype.getQuantity() - quantity < 0) {
                 throw new NotEnoughSocksException();
             } else {
@@ -92,16 +80,9 @@ public class SocksServiceImpl implements SocksService {
     @Override
     public void writeOffSocksFromStore(SocksEntity socks, Long quantity, String cause) {
         throwsInvalidValueException(socks, quantity);
-        ResultSet resultSet = dataBaseService.selectFromDataBase(socks.getColor().getNameToString(),
+        List<SocksPrototype> socksList = dataBaseService.selectFromDataBase(socks.getColor().getNameToString(),
                 socks.getReallySize(), socks.getComposition(), socks.getComposition());
-        while (resultSet.next()) {
-            SocksPrototype socksPrototype = new SocksPrototype(
-                    new SocksEntity(
-                            Color.getColor(resultSet.getString("color")),
-                            resultSet.getFloat("reallysize"),
-                            resultSet.getInt("composition")),
-                    SocksSize.checkFitToSize(resultSet.getDouble("reallysize")),
-                    resultSet.getLong("quantity"));
+        for(SocksPrototype socksPrototype: socksList){
             if (socksPrototype.getQuantity() - quantity < 0) {
                 throw new NotEnoughSocksException();
             } else {

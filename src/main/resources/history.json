@@ -1,16 +1,1 @@
-[
-  {
-    "typeOfOperations": "ACCEPTANCE",
-    "dateOfOperation": "2023-02-10T18:18:34.764418900",
-    "socks": {
-      "socksEntity": {
-        "color": "GREEN",
-        "reallySize": 39.5,
-        "composition": 95
-      },
-      "socksSize": "M",
-      "quantity": 8
-    },
-    "description": "Acceptance of socks to the warehouse from the supplier"
-  }
-]
+[{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-10T18:18:34.764418900","socks":{"socksEntity":{"color":"GREEN","reallySize":39.5,"composition":95},"socksSize":"M","quantity":8},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-14T18:52:11.560857600","socks":{"socksEntity":{"color":"WHITE","reallySize":42.0,"composition":80},"socksSize":"L","quantity":3},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-14T18:52:42.825582200","socks":{"socksEntity":{"color":"BLACK","reallySize":41.0,"composition":75},"socksSize":"L","quantity":3},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-14T18:52:50.645255400","socks":{"socksEntity":{"color":"BLACK","reallySize":41.0,"composition":75},"socksSize":"L","quantity":6},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-14T19:19:59.757644500","socks":{"socksEntity":{"color":"BLACK","reallySize":41.0,"composition":75},"socksSize":"L","quantity":6},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-14T19:20:06.738307100","socks":{"socksEntity":{"color":"BLACK","reallySize":41.0,"composition":75},"socksSize":"L","quantity":6},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-14T19:49:26.467610200","socks":{"socksEntity":{"color":"BLACK","reallySize":41.0,"composition":90},"socksSize":"L","quantity":74},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-14T19:53:05.911893","socks":{"socksEntity":{"color":"BLACK","reallySize":41.0,"composition":90},"socksSize":"L","quantity":1},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-14T20:03:15.071768100","socks":{"socksEntity":{"color":"BROWN","reallySize":44.0,"composition":100},"socksSize":"XL","quantity":1},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"ACCEPTANCE","dateOfOperation":"2023-02-14T20:03:22.046574","socks":{"socksEntity":{"color":"BROWN","reallySize":44.0,"composition":100},"socksSize":"XL","quantity":67},"description":"Acceptance of socks to the warehouse from the supplier"},{"typeOfOperations":"RELEASING","dateOfOperation":"2023-02-14T20:10:39.269666400","socks":{"socksEntity":{"color":"BROWN","reallySize":44.0,"composition":100},"socksSize":"XL","quantity":5},"description":"Releasing to user"}]

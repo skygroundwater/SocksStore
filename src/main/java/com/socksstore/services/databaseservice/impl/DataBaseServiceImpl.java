@@ -1,16 +1,12 @@
 package com.socksstore.services.databaseservice.impl;
 
-import com.socksstore.exceptions.InvalidValueException;
-import com.socksstore.models.socks.enams.SocksSize;
 import com.socksstore.models.socks.prototype.SocksPrototype;
 import com.socksstore.models.socks.prototype.SocksPrototypeMapper;
 import com.socksstore.services.databaseservice.DataBaseService;
 import lombok.SneakyThrows;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-
 import java.io.File;
-import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,84 +64,55 @@ public class DataBaseServiceImpl implements DataBaseService {
         return dataFile;
     }
 
-    private void preparedStatement(SocksPrototype socksPrototype, PreparedStatement preparedStatement) throws SQLException {
-        preparedStatement.setString(1, socksPrototype.getSocksEntity().getColor().getNameToString());
-        preparedStatement.setDouble(2, socksPrototype.getSocksEntity().getReallySize());
-        preparedStatement.setInt(3, socksPrototype.getSocksEntity().getComposition());
-        preparedStatement.setString(4, socksPrototype.getSocksSize().getNameOfSize());
-        preparedStatement.setLong(5, socksPrototype.getQuantity());
-        preparedStatement.executeUpdate();
-    }
-
-    private void deleteFromTheDataBase(SocksPrototype socksPrototype) {
-        try {
-            PreparedStatement deletePreparedStatement =
-                    connectionToDatabase.prepareStatement("DELETE FROM Socks WHERE color = ? " +
-                            "AND reallysize = ?  AND composition = ? AND sockssize = ? AND quantity = ?");
-            preparedStatement(socksPrototype, deletePreparedStatement);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void deleteFromTheDataBase(SocksPrototype socksPrototype) {
+        jdbcTemplate.update("DELETE FROM Socks WHERE color = ? " +
+                        "AND reallysize = ?  AND composition = ? AND sockssize = ? AND quantity = ?",
+                socksPrototype.getSocksEntity().getColor().getNameToString(),
+                socksPrototype.getSocksEntity().getReallySize(),
+                socksPrototype.getSocksEntity().getComposition(),
+                socksPrototype.getSocksSize().getNameOfSize(),
+                socksPrototype.getQuantity());
     }
 
     @Override
     public void addQuantityForSocks(SocksPrototype socksPrototype, long quantity) {
-        try {
-            PreparedStatement addPreparedStatement =
-                    connectionToDatabase.prepareStatement("UPDATE Socks SET quantity=? WHERE color=? AND  reallysize=? AND  composition =? AND sockssize=?");
-            addPreparedStatement.setLong(1, socksPrototype.getQuantity() + quantity);
-            addPreparedStatement.setString(2, socksPrototype.getSocksEntity().getColor().getNameToString());
-            addPreparedStatement.setDouble(3, socksPrototype.getSocksEntity().getReallySize());
-            addPreparedStatement.setInt(4, socksPrototype.getSocksEntity().getComposition());
-            addPreparedStatement.setString(5, socksPrototype.getSocksSize().getNameOfSize());
-            addPreparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        jdbcTemplate.update("UPDATE Socks SET quantity=? " +
+                        "WHERE color=? AND  reallysize=? AND  composition =? " +
+                        "AND sockssize=?", socksPrototype.getQuantity() + quantity,
+                socksPrototype.getSocksEntity().getColor().getNameToString(),
+                socksPrototype.getSocksEntity().getReallySize(),
+                socksPrototype.getSocksEntity().getComposition(),
+                socksPrototype.getSocksSize().getNameOfSize());
     }
 
     @Override
     public void takeAwayQuantityForSocks(SocksPrototype socksPrototype, long quantity) {
-        try {
-            PreparedStatement takeAwayPreparedStatement =
-                    connectionToDatabase.prepareStatement("UPDATE Socks SET quantity=? WHERE color=? AND  reallysize=? AND  composition =? AND sockssize=?");
-            takeAwayPreparedStatement.setLong(1, socksPrototype.getQuantity() - quantity);
-            takeAwayPreparedStatement.setString(2, socksPrototype.getSocksEntity().getColor().getNameToString());
-            takeAwayPreparedStatement.setDouble(3, socksPrototype.getSocksEntity().getReallySize());
-            takeAwayPreparedStatement.setInt(4, socksPrototype.getSocksEntity().getComposition());
-            takeAwayPreparedStatement.setString(5, socksPrototype.getSocksSize().getNameOfSize());
-            takeAwayPreparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        jdbcTemplate.update("UPDATE Socks SET quantity=? " +
+                        "WHERE color=? AND  reallysize=? AND  composition =? " +
+                        "AND sockssize=?", socksPrototype.getQuantity() - quantity,
+                socksPrototype.getSocksEntity().getColor().getNameToString(),
+                socksPrototype.getSocksEntity().getReallySize(),
+                socksPrototype.getSocksEntity().getComposition(),
+                socksPrototype.getSocksSize().getNameOfSize());
     }
 
     @Override
     public void insertToDatabase(SocksPrototype socksPrototype) {
-        try {
-            PreparedStatement insertPreparedStatement =
-                    connectionToDatabase.prepareStatement("INSERT INTO Socks VALUES(?,?,?,?,?)");
-            preparedStatement(socksPrototype, insertPreparedStatement);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        jdbcTemplate.update("INSERT INTO Socks VALUES(?,?,?,?,?)",
+                socksPrototype.getSocksEntity().getColor().getNameToString(),
+                socksPrototype.getSocksEntity().getReallySize(),
+                socksPrototype.getSocksSize().getNameOfSize(),
+                socksPrototype.getSocksEntity().getComposition(),
+                socksPrototype.getQuantity());
     }
 
     @Override
-    public ResultSet selectFromDataBase(String color, Double size, Integer minComposition, Integer maxComposition) {
-        try {
-            PreparedStatement selectPreparedStatement =
-                    connectionToDatabase.prepareStatement("SELECT * FROM Socks WHERE color = ? " +
-                            "AND reallysize = ? AND composition BETWEEN ? AND ?");
-            selectPreparedStatement.setString(1, color.toUpperCase());
-            selectPreparedStatement.setDouble(2, size);
-            selectPreparedStatement.setInt(3, minComposition);
-            selectPreparedStatement.setInt(4, maxComposition);
-            return selectPreparedStatement.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        throw new InvalidValueException();
+    public List<SocksPrototype> selectFromDataBase(String color, Double size, Integer minComposition, Integer maxComposition) {
+        return jdbcTemplate.query("SELECT * FROM Socks", new SocksPrototypeMapper()).stream().filter(
+                        socksPrototype -> socksPrototype.getSocksEntity().getColor().getNameToString().equals(color.toUpperCase()))
+                .filter(socksPrototype -> socksPrototype.getSocksEntity().getReallySize() == size)
+                .filter(socksPrototype -> socksPrototype.getSocksEntity().getComposition() <= maxComposition)
+                .filter(socksPrototype -> socksPrototype.getSocksEntity().getComposition() >= minComposition).toList();
     }
 }
