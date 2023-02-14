@@ -11,30 +11,12 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.sql.*;
 import java.util.List;
 
 @Service
 public class DataBaseServiceImpl implements DataBaseService {
 
-    private static final String URL = "jdbc:postgresql://localhost:5433/socks_store";
-    private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "Tilitilitatata12345";
-    private static Connection connectionToDatabase;
     private final JdbcTemplate jdbcTemplate;
-
-    static {
-        try {
-            Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            connectionToDatabase = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     public DataBaseServiceImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
