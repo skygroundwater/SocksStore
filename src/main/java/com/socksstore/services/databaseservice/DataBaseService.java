@@ -18,5 +18,7 @@ public interface DataBaseService {
 
     void insertToDatabase(SocksPrototype socksPrototype);
 
+    void batchInsertToDatabase(List<SocksPrototype> socks);
+
     List<SocksPrototype> selectFromDataBase(String color, Double size, Integer minComposition, Integer maxComposition);
 }
