@@ -4,6 +4,7 @@ import com.socksstore.models.socks.prototype.SocksPrototype;
 import com.socksstore.models.socks.prototype.SocksPrototypeMapper;
 import com.socksstore.services.databaseservice.DataBaseService;
 import lombok.SneakyThrows;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import java.io.File;
@@ -105,6 +106,27 @@ public class DataBaseServiceImpl implements DataBaseService {
                 socksPrototype.getSocksSize().getNameOfSize(),
                 socksPrototype.getSocksEntity().getComposition(),
                 socksPrototype.getQuantity());
+    }
+    @Override
+    public void batchInsertToDatabase(List<SocksPrototype> socks){
+        jdbcTemplate.batchUpdate("INSERT INTO Socks VALUES(?,?,?,?,?)",
+                new BatchPreparedStatementSetter() {
+
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setString(1, socks.get(i).getSocksEntity().getColor().getNameToString());
+                        ps.setDouble(2, socks.get(i).getSocksEntity().getReallySize());
+                        ps.setString(3, socks.get(i).getSocksSize().getNameOfSize());
+                        ps.setInt(4, socks.get(i).getSocksEntity().getComposition());
+                        ps.setLong(5, socks.get(i).getQuantity());
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return socks.size();
+                    }
+                }
+        );
     }
 
     @Override
