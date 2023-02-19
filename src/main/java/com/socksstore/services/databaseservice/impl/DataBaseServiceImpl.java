@@ -4,7 +4,6 @@ import com.socksstore.models.socks.prototype.SocksPrototype;
 import com.socksstore.models.socks.prototype.SocksPrototypeMapper;
 import com.socksstore.services.databaseservice.DataBaseService;
 import lombok.SneakyThrows;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import java.io.File;
@@ -12,14 +11,30 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 
 @Service
 public class DataBaseServiceImpl implements DataBaseService {
 
+    private static final String URL = "jdbc:postgresql://localhost:5433/socks_store";
+    private static final String USERNAME = "postgres";
+    private static final String PASSWORD = "Tilitilitatata12345";
+    private static Connection connectionToDatabase;
     private final JdbcTemplate jdbcTemplate;
+
+    static {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            connectionToDatabase = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public DataBaseServiceImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -90,28 +105,6 @@ public class DataBaseServiceImpl implements DataBaseService {
                 socksPrototype.getSocksSize().getNameOfSize(),
                 socksPrototype.getSocksEntity().getComposition(),
                 socksPrototype.getQuantity());
-    }
-
-    @Override
-    public void batchInsertToDatabase(List<SocksPrototype> socks){
-        jdbcTemplate.batchUpdate("INSERT INTO Socks VALUES(?,?,?,?,?)",
-                new BatchPreparedStatementSetter() {
-
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setString(1, socks.get(i).getSocksEntity().getColor().getNameToString());
-                        ps.setDouble(2, socks.get(i).getSocksEntity().getReallySize());
-                        ps.setString(3, socks.get(i).getSocksSize().getNameOfSize());
-                        ps.setInt(4, socks.get(i).getSocksEntity().getComposition());
-                        ps.setLong(5, socks.get(i).getQuantity());
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return socks.size();
-                    }
-                }
-                );
     }
 
     @Override

@@ -23,10 +23,10 @@ public class Config{
     @Bean
     public DataSource dataSource(){
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://localhost:5433/socks_store");
-        dataSource.setPassword("Tilitilitatata12345");
-        dataSource.setUsername("postgres");
+        dataSource.setDriverClassName(Objects.requireNonNull(environment.getProperty("driver")));
+        dataSource.setUrl(environment.getProperty("url"));
+        dataSource.setPassword(environment.getProperty("password"));
+        dataSource.setUsername(environment.getProperty("username"));
         return dataSource;
     }
 
